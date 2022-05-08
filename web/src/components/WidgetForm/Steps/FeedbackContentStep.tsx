@@ -3,6 +3,8 @@ import { FormEvent, useState } from "react";
 import { FeedbackType, feedbackTypes } from "..";
 import { CloseButton } from "../../CloseButton";
 import { ScreenshotButton } from "../../ScreenshotButton";
+import { Loading } from "../../Loading";
+import { api } from "../../../lib/api";
 
 interface FeedbackContentStepProps {
   feedbackType: FeedbackType;
@@ -17,18 +19,28 @@ export function FeedbackContentStep({
 }: FeedbackContentStepProps) {
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [isSendingFeedback, setIsSendingFeedback] = useState(false);
 
   const feedbackTypeInfo = feedbackTypes[feedbackType];
 
-  function handleFeedbackComment(event: FormEvent) {
+  async function handleFeedbackComment(event: FormEvent) {
     event.preventDefault();
 
-    console.log({
-      screenshot,
-      comment,
-    });
+    setIsSendingFeedback(true);
 
-    onFeedbackSent(true);
+    try {
+      await api.post("feedback", {
+        screenshot,
+        comment,
+        type: feedbackType,
+      });
+
+      setIsSendingFeedback(false);
+      onFeedbackSent(true);
+    } catch (error) {
+      console.log(error);
+      setIsSendingFeedback(false);
+    }
   }
 
   return (
@@ -77,7 +89,7 @@ export function FeedbackContentStep({
 
           <button
             type="submit"
-            disabled={comment.length <= 0}
+            disabled={comment.length <= 0 || isSendingFeedback}
             className={`
             p-2 bg-brand-500 rounded-md border-transparent flex flex-1
             justify-center items-center text-sm hover:bg-brand-300
@@ -85,7 +97,7 @@ export function FeedbackContentStep({
             fucus-border-style 
          `}
           >
-            Enviar feedback
+            {isSendingFeedback ? <Loading /> : "Enviar feedback"}
           </button>
         </footer>
       </form>
