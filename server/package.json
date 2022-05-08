@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules --respawn .",
-    "test": "jest"
+    "test": "jest",
+    "build": "npx tsc",
+    "start": "node dist/server.js"
   },
   "devDependencies": {
     "@swc/core": "^1.2.177",
